@@ -1,11 +1,8 @@
 package com.hpywl.controller;
 
-import org.apache.commons.fileupload.FileItem;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 import java.io.File;
@@ -20,6 +17,8 @@ public class Upload {
 
     @RequestMapping("/fileUploadController")
     public Map<String, Object> fileUpload(@RequestParam("fileObj") CommonsMultipartFile file) throws IOException {
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("success",true);
         if (!file.isEmpty()) {
             String  filename = file.getFileItem().getName();
             System.out.println("开始上传。。。"+filename);
@@ -41,8 +40,10 @@ public class Upload {
                 if (!new File(path).exists()) {
                     new File(path).mkdirs();
                     file.transferTo(new File(path)); //保存文件
+                    map.put("tag",true);
                     System.out.println( "上传成功");
                 } else {
+                    map.put("tag",false);
                     System.out.println("文件已存在");
                 }
             } else {
@@ -51,12 +52,14 @@ public class Upload {
         } else {
             System.out.println("请选择需要上传的文件");
         }
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("success",true);
-        map.put("tag",true);
         return map;
     }
 
+    /**
+     * 使用io流来保存数据
+     * @param ins
+     * @param file
+     */
     private static void inputStreamToFile(InputStream ins, File file) {
         FileOutputStream os = null;
         try {
