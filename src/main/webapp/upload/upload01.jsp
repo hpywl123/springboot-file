@@ -27,17 +27,26 @@
 
             $("#cancel").click(function(){
                 closeProgess();
-                $("#pdBar").css({"width":"0%"});
                 clearInterval(timeInfo);
             });
         });
 
         //文件上传
         function uploadFile(){
-            var fileObj = $("#fileObj")[0].files[0];//必须这样写,否则取不到文件
+            const fileObj = $("#fileObj")[0].files[0];//必须这样写,否则取不到文件
+            //获取后缀名
+            const suffix = fileObj.name.substring(fileObj.name.lastIndexOf(".") + 1);
+            //设置允许上传文件类型
+            const suffixList = "jpg,png,ico,bmp,jpeg,txt,mkv";
+            if (suffixList.indexOf(suffix.trim().toLowerCase())==-1) {
+                closeProgess();
+                clearInterval(timeInfo);
+                alert("上传文件格式不正确！");
+                return;
+            }
             //$('#form1').serialize() 无法序列化二进制文件，这里采用formData上传
             //需要浏览器支持：Chrome 7+、Firefox 4+、IE 10+、Opera 12+、Safari 5+。
-            var formData = new FormData(); // FormData 对象
+            const formData = new FormData(); // FormData 对象
 //      formData.append("author", "hooyes"); // 可以增加表单数据
             formData.append("fileObj", fileObj); // 文件对象
             $.ajax({
@@ -50,11 +59,17 @@
                 contentType: false,/*必须false才会自动加上正确的Content-Type */
                 processData: false,/*必须false才会避开jQuery对 formdata 的默认处理XMLHttpRequest会对 formdata 进行正确的处理*/
                 success:function(res){
-                    if(res.tag === true){
+                    if(res.tag === 1){
                         clearInterval(timeInfo);
                         getUploadInfo();//修正得到文件上传信息
                         //setPdWidth(100);//修正文件上传为100%
                         //alert("上传成功!");
+                    }else if(res.tag===2){
+                        clearInterval(timeInfo);
+                        alert("文件已存在!");
+                    }else if(res.tag===3){
+                        clearInterval(timeInfo);
+                        alert("请选择需要上传的文件!");
                     }else{
                         clearInterval(timeInfo);
                         alert("上传失败!");
@@ -172,7 +187,7 @@
         <p>开始时间:<font id="startTime" color="red"></font></p>
         <p>现在时间:<font id="currentTime" color="red"></font></p>
         <p>已经传输了的时间(s):<font id="time" color="red"></font></p>
-        <p>传输速度(byte/s):<font id="velocity" color="red"></font></p>
+        <p>传输速度(MB/s):<font id="velocity" color="red"></font></p>
         <p>估计总时间:<font id="totalTime" color="red"></font></p>
         <p>估计剩余时间:<font id="timeLeft" color="red"></font></p>
         <p>上传百分比:<font id="percent" color="red"></font></p>

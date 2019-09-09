@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,17 +28,18 @@ public class UploadInfo {
             return result;
         }
 
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         long startTime = status.getStartTime();  //上传开始时间
         long currentTime = System.currentTimeMillis(); //现在时间
         long time = (currentTime - startTime) /1000 +1;//已经传顺的时间 单位：s
-        double velocity = status.getBytesRead()/time; //传输速度：byte/s
-        double totalTime = status.getContentLength()/velocity; //估计总时间
-        double timeLeft = totalTime -time;    //估计剩余时间
+        double velocity = status.getBytesRead()/time/1024/1024; //传输速度：mb/s
+        double totalTime = Math.floor(status.getContentLength()/velocity/1024/1024); //估计总时间
+        double timeLeft = Math.floor(totalTime -time);    //估计剩余时间
         int percent = (int)(100*(double)status.getBytesRead()/(double)status.getContentLength()); //百分比
         double length = status.getBytesRead()/1024/1024; //已完成数
         double totalLength = status.getContentLength()/1024/1024; //总长度  M
-        result.put("startTime",startTime);
-        result.put("currentTime",currentTime);
+        result.put("startTime",sdf.format(new Date(startTime)));
+        result.put("currentTime",sdf.format(new Date(currentTime)));
         result.put("time",time);
         result.put("velocity",velocity);
         result.put("totalTime",totalTime);
